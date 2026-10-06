@@ -1,0 +1,17 @@
+import pygame as pg
+
+BGCOLOR = (200, 100, 200)
+WIDTH = 1024
+HEIGHT = 768
+TITLE = "Best game ever!"
+TILESIZE = 32
+FPS= 30
+
+#colors
+WHITE = (255,255,255)
+WHITE = (0, 255, 0)
+RED = (255, 0 ,0)
+BLACK = (0, 0 ,0)
+
+PLAYER_SPEED = 300
+PLAYER_HIT_RECT = pg.Rect (0,0, TILESIZE-5, TILESIZE-5)
