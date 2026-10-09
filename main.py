@@ -23,6 +23,12 @@ Process: cursor position, position of player, enemy position, aim in FPS, veloci
 Output: Graphics, sound(gunfire, jump, walking, haptics)
 
 
+GOALS: make money, commit crimes, own vehicles
+RULES: Can't fly, cant shoot through walls, cant leave map
+FEEDBACK:screen turns red when damaged, gun recoil, money counter
+FREEDOM:
+
+
 '''
 
 "Input (events)"

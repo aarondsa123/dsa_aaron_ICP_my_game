@@ -38,7 +38,7 @@ def collide_with_walls(sprite, group, dir):
             sprite.vel.y = 0
             sprite.hit_rect.centery = sprite.pos.y
 
-def collide_with_walls(sprite, group, dir):
+
     #check for y collision
     if dir == 'y':
         #check to see if we have collided with hitrects
@@ -144,6 +144,7 @@ class Wall(Sprite):
 class Mob(Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.all_mobs
+        Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(RED)
@@ -190,13 +191,17 @@ class Mob(Sprite):
         self.y = y * TILESIZE
 
     def update(self):
-        if self.rect.right > WIDTH or self.rect.x <0:
-            self.speed*=-1
-            self.y += TILESIZE
-        self.x += self.vx * self.game.dt * self.speed
-        self.rect.x = self.x
-        # self.y += self.vy * self.game.dt * self.speed
-        self.rect.y = self.y
+        self.animate()
+        if self.game.player:
+            self.chase(self.game.player)
+        self.rect.center = self.pos
+        self.pos += self.vel * self.game.dt
+        self.hit_rect.centerx = self.pos.x
+        collide_with_walls(self, self.game.all_walls, 'x')
+        self.hit_rect.centery = self.pos.y
+        collide_with_walls(self, self.game.all_walls, 'y')
+        self.rect.center = self.hit_rect.center
+        
 
 
 
