@@ -43,17 +43,28 @@ class Game():
         self.running = True
         self.playing = True
         self.clock = pg.time.Clock()
+        self.high_score = 0
+        self.score = 0
 
     def load_data(self, map):
+        self.game_dir = path.join(self.game_dir, "highscore.txt")
         self.game_dir = path.dirname(__file__)
         self.img_dir = path.join(self.game_dir, 'images')
         self.snd_dir = path.join(self.game_dir, 'audio')
         self.map = Map(path.join(self.game_dir, map))
 
+        try:
+            with open(self.game_save_file, "x", encoding="utf-8") as file:
+                file.write("hello world")
+            print("file made succesfully")
+
+        except FileExistsError:
+            print("File already exists")
+
+
     
     def new(self):
         self.load_data('level1.txt')
-        print(self.map.data)
         self.all_sprites = pg.sprite.Group()
         self.all_walls = pg.sprite.Group()
         self.all_mobs = pg.sprite.Group()
@@ -64,13 +75,12 @@ class Game():
                 if tile == '1':
                     Wall(self, col, row)
                 if tile == 'M':
-                    pass
-                    
+                    Mob(self, col, row)
         for row, tiles in enumerate(self.map.data):
             for col, tile, in enumerate(tiles):
                 if tile == 'P':
-                    Player(self, col, row)
-                    
+                    self.player = Player(self, col, row)
+
         
 
 
@@ -84,11 +94,14 @@ class Game():
  
     def events(self):
         for event in pg.event.get():
+            if events in pg.event.get()
             if event.type == pg.QUIT:
-                if self.playing:
-                    self.playing = False
-                self.running = False
-
+                with open(path.join(self.game_dir, self.game_save_file, "w")) as f:
+                    f.write(str(self.score))
+                #allows me to check blocks for exceptions when game is run  
+            if self.playing:
+                self.playing = False
+            self.running = False
     def draw_text(self, text, size, color, x, y):
         font_name = pg.font.match_font('arial')
         font = pg.font.Font(font_name, size)
@@ -101,11 +114,16 @@ class Game():
         self.all_sprites.update()
     # creates an output for the screen color
     def draw(self):
-        #order matters because bottom things are first to be drawn the last things are drawn on top
-        #last lines are drwan on top in this method
+        # this order matters: the first things are on the bottom because they are the firs to be drawn
+        # the last lines in this method are drawn on top or last
         self.screen.fill(BGCOLOR)
         self.all_sprites.draw(self.screen)
+        self.draw_text("Frames per second: " + str(floor(1/self.dt) ), 24, WHITE, WIDTH/2, HEIGHT/4)
+
+        
         pg.display.flip()
+
+    
 #runs the game
 if __name__ == "__main__":
     g = Game()
@@ -115,5 +133,3 @@ if __name__ == "__main__":
 while g.running:
     g.new()
     g.run()
-
-

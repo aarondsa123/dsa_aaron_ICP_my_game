@@ -141,22 +141,6 @@ class Wall(Sprite):
         print(self.rect.x)
         print(self.rect.y)
 
-class Mob(Sprite):
-    def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.all_mobs
-        Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)
-        self.speed = (200)
-        self.rect = self.image.get_rect()
-        self.vel = vec(0,0)
-        self.pos = vec(x,y)
-        self.speed = 1
-        # self.vx, self.vy = 0,0
-        # self.vx, self.vy
-        # self.x = x * TILESIZE
-        # self.y = y * TILESIZE
 
     def update(self):
         self.get_keys()
@@ -176,24 +160,87 @@ class Wall(Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
+class Coin(Sprite):
+    #Need to finish(Need coins in player make sure to add)
+    pass
 class Mob(Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.all_mobs
+        Sprite.__init__(self, self.groups)
         self.game = game
+        self.spritesheet = Spritesheet(path.join(self.game.img_dir, "sprite_sheet.png"))
+        self.load_images()
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)
-        self.speed = (200)
+        self.image = self.spritesheet.get_image(0,0,TILESIZE, TILESIZE)
+        # self.image.fill(RED)
         self.rect = self.image.get_rect()
-        self.speed = 1
-        self.vx, self.vy = 1,0
-        self.vx, self.vy
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
+        self.speed = 100
+        self.vel = vec(0,0)
+        self.pos = vec(x*TILESIZE,y*TILESIZE)
+        self.x = x*TILESIZE
+        self.y = y*TILESIZE
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.dir = "none"
+        self.last_update = 0
+        self.current_frame = 0
+        self.hit_rect = MOB_HIT_RECT
+        print("mob initialized")
+        print(self.rect.x)
+        print(self.rect.y)
+    def load_images(self):
+            self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
+                                self.spritesheet.get_image(96,0,TILESIZE, TILESIZE)
+                                ]
+            self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
+                                self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                                ]   
+
+    def animate(self):
+            # use the time element to get now
+            now = pg.time.get_ticks()
+            if self.dir == "none":
+                if now - self.last_update > 350:
+                    self.last_update = now
+                    self.current_frame = (self.current_frame + 1) % len(self.idle_frames)
+                    bottom = self.rect.bottom
+                    self.image = self.idle_frames[self.current_frame]
+                    self.image.set_colorkey(BLACK)
+                    self.rect = self.image.get_rect()
+                    self.rect.bottom = bottom
+            elif self.dir == "right":
+                pass 
+
+    def chase(self, obj):
+        if self.pos.x < obj.pos.x:
+            self.vel.x = self.speed
+            self.dir = "right"
+        elif self.pos.x > obj.pos.x:
+            self.vel.x = -self.speed
+            self.dir = "left"
+        else:
+            self.vel.x = 0
+
+        if self.pos.y < obj.pos.y:
+            self.vel.y = self.speed
+        elif self.pos.y > obj.pos.y:
+            self.vel.y = -self.speed
+        else:
+            self.vel.y = 0
+
+    def load_images(self):
+        self.idle_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
+                            self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                            ]
+        self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
+                            self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                            ]
 
     def update(self):
+        self.get_keys()
+        hits = pg.sprite.spritecollide(self, self.game)
         self.animate()
-        if self.game.player:
-            self.chase(self.game.player)
+        self.chase(self.game.player)
         self.rect.center = self.pos
         self.pos += self.vel * self.game.dt
         self.hit_rect.centerx = self.pos.x
