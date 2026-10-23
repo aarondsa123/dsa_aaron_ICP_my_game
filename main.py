@@ -124,6 +124,8 @@ class Game():
         pg.display.flip()
 
     
+
+    
 #runs the game
 if __name__ == "__main__":
     g = Game()
