@@ -26,14 +26,8 @@ class Spritesheet:
         image = new_image
         return image
 
-class Cooldown:
+class Timer:
     def __init__(self):
-        self.current_time = 0
-        self.current_time = 0
-        self.delta = 0
-    def ticking(self):
-        # Convert ticks to seconds
-        self.current_time = pg.time.get_ticks() // 1000
-        self.delta = self.current_time - self.event_time
-    def start(self):
-        self.start_time = pg.time.get_ticks()
+        self.event_time = floor((pg.time.get_ticks())/1000)
+    def get_delta(self):
+        return floor((pg.time.get_ticks())/1000) - self.event_time

@@ -58,31 +58,34 @@ class Player(Sprite):
         self.hit_rect = PLAYER_HIT_RECT
         self.vel = vec(0,0)
         self.pos = vec(x*TILESIZE,y*TILESIZE)
+        self.acc = vec(0,0)
         # animation stuff
         self.last_update = 0
         self.current_frame = 0
         self.dir = "none"
         self.coins = 0
+        self.cofric = -0.1
+        self.jumping = False
         print('player instantiated')
         print(self.pos)
-
         
 
     def get_keys(self):
-        # reset v to zero
-        # listen for events specific to keys
-        # change velocity based on which key is pressed
-        self.vel = vec(0,0)
+        # self.vel = vec(0,0)
+        self.dir = "none"
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vel.x = -PLAYER_SPEED
+            self.acc.x = -PLAYER_ACC
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.vel.x = PLAYER_SPEED
+            self.dir = "right"
+            self.acc.x = PLAYER_ACC
         if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vel.y = -PLAYER_SPEED
-        if keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.vel.y = PLAYER_SPEED
-        #checks if player moving diagnol
+            self.acc.y = -PLAYER_ACC
+        if keys[pg.K_LEFT] or keys[pg.K_s]:
+            self.acc.y = PLAYER_ACC
+        if keys[pg.K_SPACE]:
+            self.jump()
+        # check to see if player is moving diagonal
         if self.vel.x != 0 and self.vel.y != 0:
             self.vel *= 0.7071
 
@@ -90,7 +93,7 @@ class Player(Sprite):
         # use the time element to get now
         now = pg.time.get_ticks()
         if self.dir == "none":
-            if now - self.last_update > 100000:
+            if now - self.last_update > 100:
                 self.last_update = now
                 self.current_frame = (self.current_frame + 1) % len(self.idle_frames)
                 bottom = self.rect.bottom
@@ -107,27 +110,52 @@ class Player(Sprite):
         self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
                             self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
                             ]
+
+    def jump(self):
+        # jump only if standing on a platform
+        self.rect.y += 2
+        hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
+        self.rect.y -= 2
+        if hits and not self.jumping:
+            self.game.jump_sound.play()
+            self.jumping = True
+            self.vel.y = -PLAYER_JUMP
+    
+    def is_jumping(self):
+        if self.vel.y > 0:
+            hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
+            if hits:
+                self.jumping = False
          
     def update(self):
+        self.animate()
+        self.is_jumping()
+        self.acc = vec(0,PLAYER_GRAV)
         self.get_keys()
+        self.acc.x += self.vel.x * PLAYER_FRIC
+        self.acc.y += self.vel.y * PLAYER_FRIC
+        self.vel += self.acc
+        if abs(self.vel.x) < 0.1:
+            self.vel.x = 0
+        if abs(self.vel.y) < 0.1:
+            self.vel.y = 0
+        # self.rect.center = self.pos
+        self.pos += self.vel + 0.5 * self.acc
+        # self.pos += self.vel * self.game.dt + 0.5 * self.acc
+        # self.pos += self.vel * self.game.dt
         hits = pg.sprite.spritecollide(self, self.game.all_coins, True)
         if hits:
-            for i in range(100):
-                Particle(self.game, hits[0].pos.x, hits[0].pos.y)
+            for i in range(25):
+                p = Particle(self.game, hits[0].pos.x, hits[0].pos.y)
             self.coins += 1
             self.game.pickup_snd.play()
             self.game.score += 1
-        self.animate()
-        self.rect.center = self.pos
-        self.pos += self.vel * self.game.dt
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self, self.game.all_walls, 'x')
         self.hit_rect.centery = self.pos.y
-        collide_with_walls(self, self.game.all_walls, 'y')
+        if collide_with_walls(self, self.game.all_walls, 'y'):
+            self.jumping = False
         self.rect.center = self.hit_rect.center
-
-
-
 
 class Wall(Sprite):
     def __init__(self, game, x, y):
@@ -137,9 +165,9 @@ class Wall(Sprite):
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(WHITE)
         self.rect = self.image.get_rect()
-        self.vx, self.xy = 0,0
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
+        self.vx, self.vy = 0,0
+        self.x = x*TILESIZE
+        self.y = y*TILESIZE
         self.rect.x = self.x
         self.rect.y = self.y
 
@@ -153,25 +181,16 @@ class Particle(Sprite):
         self.rect = self.image.get_rect()
         self.vel = vec(randint(-180,180),randint(-180,180))
         self.pos = vec(x,y)
-        self.speed = 5
-        self.countdown = Cooldown()
+        self.speed = .5
+        self.countdown = Timer()
         self.countdown.event_time = floor(pg.time.get_ticks()/1000)
 
 
     def update(self):
-        self.countdown.ticking()
-
+        print(self.countdown.get_delta())
         self.pos += self.vel * self.speed * self.game.dt
-        # use the countdown to eliminate particles after 2 seconds
-        if self.countdown.delta > 1:
+        if self.countdown.get_delta() > 2:
             self.kill()
-            print("im dead")
-
-        print(self.countdown.delta)
-        self.rect.x = self.pos.x
-        self.rect.y = self.pos.y
-
-        print(self.countdown.delta)
         self.rect.x = self.pos.x
         self.rect.y = self.pos.y
 
@@ -245,15 +264,13 @@ class Mob(Sprite):
         self.current_frame = 0
         self.hit_rect = MOB_HIT_RECT
         print("mob initialized")
-        print(self.rect.x)
-        print(self.rect.y)
     def load_images(self):
-            self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
-                                self.spritesheet.get_image(96,0,TILESIZE, TILESIZE)
-                                ]
-            self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
-                                self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
-                                ]   
+        self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
+                        self.spritesheet.get_image(96,0,TILESIZE, TILESIZE)
+                        ]
+        self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
+                       self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                       ]
 
     def animate(self):
             # use the time element to get now
@@ -287,17 +304,7 @@ class Mob(Sprite):
         else:
             self.vel.y = 0
 
-    def load_images(self):
-        self.idle_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
-                            self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
-                            ]
-        self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
-                            self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
-                            ]
-
     def update(self):
-        self.get_keys()
-        hits = pg.sprite.spritecollide(self, self.game)
         self.animate()
         self.chase(self.game.player)
         self.rect.center = self.pos

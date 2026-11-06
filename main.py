@@ -7,6 +7,7 @@ from settings import *
 #importing settings to change colors and sizes of stuff on screen
 from sprites import *
 from utils import *
+from math import floor
 #
 
 '''
@@ -32,9 +33,9 @@ FREEDOM:
 '''
 
 "Input (events)"
-class Game():
+class Game:
     #initate the game, charactars, etc.
-    def __init__ (self):
+    def __init__(self):
         pg.init()
         pg.mixer.init()
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -53,6 +54,7 @@ class Game():
         self.snd_dir = path.join(self.game_dir, 'audio')
         self.pickup_snd = pg.mixer.Sound(path.join(self.snd_dir, "pickup.wav"))
         self.map = Map(path.join(self.game_dir, map))
+        self.jump_sound = pg.mixer.Sound(path.join(self.snd_dir, 'Jump33.wav'))
 
         try:
             with open(self.game_save_file, 'x', encoding="utf-8") as file:
@@ -131,7 +133,7 @@ class Game():
         # the last lines in this method are drawn on top or last
         self.screen.fill(BGCOLOR)
         self.all_sprites.draw(self.screen)
-        self.draw_text(f"Frames per second:{1/self.dt}", 24, WHITE, WIDTH/2, HEIGHT/4)
+        self.draw_text(f"Frames per second:{floor(1/self.dt)}", 24, WHITE, WIDTH/2, HEIGHT/4)
         self.draw_text(f"Coins:{self.player.coins}", 24, WHITE, WIDTH/2, HEIGHT/7)
         self.draw_text(f"Score:{self.score}", 24, WHITE, WIDTH/2, HEIGHT/8)
         self.draw_text(f"High Score:{self.high_score}", 24, WHITE, WIDTH/2, HEIGHT/12)
@@ -149,3 +151,14 @@ if __name__ == "__main__":
 while g.running:
     g.new()
     g.run()
+
+
+
+
+'''
+GOAL:Dont get caught by classmantes
+RULES: No going off map, no hacking
+FEEDBACK:Speed boosts, vehicle?
+FREEDOM:Can go anywhere on mao, you can choose which charactar to UserWarning
+
+'''
