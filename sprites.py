@@ -320,4 +320,27 @@ class Mob(Sprite):
 
     
  
-    
+    class Powerup(Sprite):#speed boost powerup only so far is goal
+        def __init__(self, game, x, y):
+            self.groups = game.all_sprites, game.all_powerups
+            Sprite.__init__(self, self.groups)
+            self.game = game
+            self.spritesheet = Spritesheet(path.join(self.game.img_dir, "sprite_sheet.png"))
+            self.load_images()
+            self.image = self.spritesheet.get_image(0,0,TILESIZE, TILESIZE)
+            self.rect = self.image.get_rect()
+            self.image.set_colorkey(BLACK)
+            self.pos = vec(x*TILESIZE,y*TILESIZE)
+            self.rect.x = self.pos.x
+            self.rect.y = self.pos.y
+            self.last_update = 0
+            self.current_frame = 0
+            print(self.rect.x)
+            print(self.rect.y)
+            
+
+                
+    def load_images(self):
+                self.idle_frames = [self.spritesheet.get_image(32,0,TILESIZE, TILESIZE),
+                                    self.spritesheet.get_image(32,0,TILESIZE, TILESIZE)
+                                    ]
