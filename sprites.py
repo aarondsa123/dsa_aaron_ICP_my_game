@@ -116,10 +116,10 @@ class Player(Sprite):
         self.rect.y += 2
         hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
         self.rect.y -= 2
-        if hits and not self.jumping:
-            self.game.jump_sound.play()
-            self.jumping = True
-            self.vel.y = -PLAYER_JUMP
+        #if hits and not self.jumping:
+            # self.game.jump_sound.play()
+            # self.jumping = True
+            # self.vel.y = -PLAYER_JUMP
     
     def is_jumping(self):
         if self.vel.y > 0:
@@ -148,7 +148,7 @@ class Player(Sprite):
             for i in range(25):
                 p = Particle(self.game, hits[0].pos.x, hits[0].pos.y)
             self.coins += 1
-            self.game.pickup_snd.play()
+           # self.game.pickup_snd.play()
             self.game.score += 1
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self, self.game.all_walls, 'x')
@@ -314,30 +314,7 @@ class Mob(Sprite):
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.all_walls, 'y')
         self.rect.center = self.hit_rect.center
-        
 
-
-
-    
- 
-    class Powerup(Sprite):#speed boost powerup only so far is goal
-        def __init__(self, game, x, y):
-            self.groups = game.all_sprites, game.all_powerups
-            Sprite.__init__(self, self.groups)
-            self.game = game
-            self.spritesheet = Spritesheet(path.join(self.game.img_dir, "sprite_sheet.png"))
-            self.load_images()
-            self.image = self.spritesheet.get_image(0,0,TILESIZE, TILESIZE)
-            self.rect = self.image.get_rect()
-            self.image.set_colorkey(BLACK)
-            self.pos = vec(x*TILESIZE,y*TILESIZE)
-            self.rect.x = self.pos.x
-            self.rect.y = self.pos.y
-            self.last_update = 0
-            self.current_frame = 0
-            print(self.rect.x)
-            print(self.rect.y)
-            
 
                 
     def load_images(self):

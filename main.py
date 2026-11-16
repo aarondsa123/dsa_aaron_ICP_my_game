@@ -32,6 +32,12 @@ FREEDOM:
 
 '''
 
+
+'''
+Need to add images from piskel for player mob and wall
+
+'''
+
 "Input (events)"
 class Game:
     #initate the game, charactars, etc.
@@ -50,11 +56,13 @@ class Game:
     def load_data(self, map):
         self.game_dir = path.dirname(__file__)
         self.game_save_file = path.join(self.game_dir, "highscore.txt")
-        self.img_dir = path.join(self.game_dir, 'images')
-        self.snd_dir = path.join(self.game_dir, 'audio')
-        self.pickup_snd = pg.mixer.Sound(path.join(self.snd_dir, "pickup.wav"))
+
+        #self.img_dir = path.join(self.game_dir, 'images')
+        # sound handling
+        # self.snd_dir = path.join(self.game_dir, 'audio')
+        #self.pickup_snd = pg.mixer.Sound(path.join(self.snd_dir, "fevereddream"))
+    
         self.map = Map(path.join(self.game_dir, map))
-        self.jump_sound = pg.mixer.Sound(path.join(self.snd_dir, 'Jump33.wav'))
 
         try:
             with open(self.game_save_file, 'x', encoding="utf-8") as file:
@@ -96,6 +104,10 @@ class Game:
             for col, tile, in enumerate(tiles):
                 if tile == 'P':
                     self.player = Player(self, col, row)
+
+        #Background music
+        pg.mixer.music.load(path.join(self.snd_dir,"background_audio.wav"))
+        pg.mixer.music.play(loops=-1)
 
         
 
