@@ -56,14 +56,11 @@ class Game:
     def load_data(self, map):
         self.game_dir = path.dirname(__file__)
         self.game_save_file = path.join(self.game_dir, "highscore.txt")
-
-        #self.img_dir = path.join(self.game_dir, 'images')
+        self.img_dir = path.join(self.game_dir, 'images')
         # sound handling
-        # self.snd_dir = path.join(self.game_dir, 'audio')
+        self.snd_dir = path.join(self.game_dir, 'audio')
         #self.pickup_snd = pg.mixer.Sound(path.join(self.snd_dir, "fevereddream"))
-    
         self.map = Map(path.join(self.game_dir, map))
-
         try:
             with open(self.game_save_file, 'x', encoding="utf-8") as file:
                 file.write("hello world!")

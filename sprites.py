@@ -116,10 +116,10 @@ class Player(Sprite):
         self.rect.y += 2
         hits = pg.sprite.spritecollide(self, self.game.all_walls, False)
         self.rect.y -= 2
-        #if hits and not self.jumping:
+        if hits and not self.jumping:
             # self.game.jump_sound.play()
-            # self.jumping = True
-            # self.vel.y = -PLAYER_JUMP
+            self.jumping = True
+            self.vel.y = -PLAYER_JUMP
     
     def is_jumping(self):
         if self.vel.y > 0:
@@ -219,9 +219,9 @@ class Coin(Sprite):
         print(self.rect.x)
         print(self.rect.y)
     def load_images(self):
-                self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
-                                    self.spritesheet.get_image(96,0,TILESIZE, TILESIZE)
-                                    ]
+        self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
+                            self.spritesheet.get_image(96,0,TILESIZE, TILESIZE)
+                            ]
 
     def animate(self):
             # use the time element to get now
@@ -314,10 +314,3 @@ class Mob(Sprite):
         self.hit_rect.centery = self.pos.y
         collide_with_walls(self, self.game.all_walls, 'y')
         self.rect.center = self.hit_rect.center
-
-
-                
-    def load_images(self):
-                self.idle_frames = [self.spritesheet.get_image(32,0,TILESIZE, TILESIZE),
-                                    self.spritesheet.get_image(32,0,TILESIZE, TILESIZE)
-                                    ]
