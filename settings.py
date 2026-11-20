@@ -1,6 +1,6 @@
 import pygame as pg
 
-BGCOLOR = (200, 100, 200)
+BGCOLOR = (88, 88, 68)
 WIDTH = 1024
 HEIGHT = 768
 TITLE = "Best game ever!"

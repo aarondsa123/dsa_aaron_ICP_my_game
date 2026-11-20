@@ -147,7 +147,6 @@ class Game:
         self.draw_text(f"Score:{self.score}", 24, WHITE, WIDTH/2, HEIGHT/8)
         self.draw_text(f"High Score:{self.high_score}", 24, WHITE, WIDTH/2, HEIGHT/12)
         pg.display.flip()
-
     
 
     

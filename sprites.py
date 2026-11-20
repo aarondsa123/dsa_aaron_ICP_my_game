@@ -51,7 +51,7 @@ class Player(Sprite):
         self.spritesheet = Spritesheet(path.join(self.game.img_dir, "sprite_sheet.png"))
         self.load_images()
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image = self.spritesheet.get_image(0,0,TILESIZE, TILESIZE)
+        self.image = self.spritesheet.get_image(64,0,TILESIZE, TILESIZE)
         self.image.set_colorkey(BLACK)
         # self.image.fill(WHITE)
         self.rect = self.image.get_rect()
@@ -81,13 +81,10 @@ class Player(Sprite):
             self.acc.x = PLAYER_ACC
         if keys[pg.K_UP] or keys[pg.K_w]:
             self.acc.y = -PLAYER_ACC
-        if keys[pg.K_LEFT] or keys[pg.K_s]:
+        if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.acc.y = PLAYER_ACC
         if keys[pg.K_SPACE]:
             self.jump()
-        # check to see if player is moving diagonal
-        if self.vel.x != 0 and self.vel.y != 0:
-            self.vel *= 0.7071
 
     def animate(self):
         # use the time element to get now
@@ -103,12 +100,12 @@ class Player(Sprite):
                 self.rect.bottom = bottom
         elif self.dir == "right":
             pass
+#    goes through multiple pictures of sprite 
+   
     def load_images(self):
-        self.idle_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
-                            self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
                             ]
-        self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
-                            self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                self.run_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
                             ]
 
     def jump(self):
@@ -148,11 +145,17 @@ class Player(Sprite):
             for i in range(25):
                 p = Particle(self.game, hits[0].pos.x, hits[0].pos.y)
             self.coins += 1
-           # self.game.pickup_snd.play()
             self.game.score += 1
+            # respawns coin in a random place after player gets one
+            Coin(self.game, randint(1, 30), randint(1, 22))
+        if pg.sprite.spritecollide(self, self.game.all_mobs, False):
+            self.game.score = 0
+        # makes player not go through mobs
         self.hit_rect.centerx = self.pos.x
+        collide_with_walls(self, self.game.all_mobs, 'x')
         collide_with_walls(self, self.game.all_walls, 'x')
         self.hit_rect.centery = self.pos.y
+        collide_with_walls(self, self.game.all_mobs, 'y')
         if collide_with_walls(self, self.game.all_walls, 'y'):
             self.jumping = False
         self.rect.center = self.hit_rect.center
@@ -219,8 +222,7 @@ class Coin(Sprite):
         print(self.rect.x)
         print(self.rect.y)
     def load_images(self):
-        self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
-                            self.spritesheet.get_image(96,0,TILESIZE, TILESIZE)
+               self.idle_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
                             ]
 
     def animate(self):
@@ -249,7 +251,7 @@ class Mob(Sprite):
         self.spritesheet = Spritesheet(path.join(self.game.img_dir, "sprite_sheet.png"))
         self.load_images()
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image = self.spritesheet.get_image(0,0,TILESIZE, TILESIZE)
+        self.image = self.spritesheet.get_image(32,0,TILESIZE, TILESIZE)
         # self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.speed = 100
@@ -262,14 +264,14 @@ class Mob(Sprite):
         self.dir = "none"
         self.last_update = 0
         self.current_frame = 0
-        self.hit_rect = MOB_HIT_RECT
+        #gives each mob their own hit box
+        #claude opus 5.5 medium prompt: how should i give each mob a seperate hitbox? (I pasted in mob sprite)
+        self.hit_rect = MOB_HIT_RECT.copy()
         print("mob initialized")
     def load_images(self):
-        self.idle_frames = [self.spritesheet.get_image(64,0,TILESIZE, TILESIZE),
-                        self.spritesheet.get_image(96,0,TILESIZE, TILESIZE)
+                self.idle_frames = [self.spritesheet.get_image(32,0,TILESIZE, TILESIZE),
                         ]
-        self.run_frames = [self.spritesheet.get_image(0,0,TILESIZE, TILESIZE),
-                       self.spritesheet.get_image(TILESIZE,0,TILESIZE, TILESIZE)
+                self.run_frames = [self.spritesheet.get_image(32,0,TILESIZE, TILESIZE),
                        ]
 
     def animate(self):
@@ -309,6 +311,13 @@ class Mob(Sprite):
         self.chase(self.game.player)
         self.rect.center = self.pos
         self.pos += self.vel * self.game.dt
+        # keep mobs 5 pixels apart
+        #claude opus 5.5 medium prompt: where and how can i add 5 tilesize difference between mobs? (pasted in all of mob)
+        for mob in self.game.all_mobs:
+            if mob != self:
+                dist = self.pos - mob.pos
+                if 0 < dist.length() < TILESIZE + 5:
+                    self.pos += dist.normalize() * (TILESIZE + 5 - dist.length())
         self.hit_rect.centerx = self.pos.x
         collide_with_walls(self, self.game.all_walls, 'x')
         self.hit_rect.centery = self.pos.y
