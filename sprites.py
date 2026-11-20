@@ -147,17 +147,27 @@ class Player(Sprite):
             self.coins += 1
             self.game.score += 1
             # respawns coin in a random place after player gets one
+            # map itself is 32 tiles wide (0-31) and 24 tall (0-23)
+            # 1-30 and 1-22 keep the coin inside the border
             Coin(self.game, randint(1, 30), randint(1, 22))
+              # if a mob touches the player, reset the score to 0
         if pg.sprite.spritecollide(self, self.game.all_mobs, False):
             self.game.score = 0
         # makes player not go through mobs
+        # move the player's hit box with its horizontal position
         self.hit_rect.centerx = self.pos.x
+        # push player out of mobs after walls
+        #so that when player hits wall and mob they cant be pushed
         collide_with_walls(self, self.game.all_mobs, 'x')
         collide_with_walls(self, self.game.all_walls, 'x')
+        # move the player's hit box to its vertical position
         self.hit_rect.centery = self.pos.y
+        # same order for up/down: mobs first, then walls
         collide_with_walls(self, self.game.all_mobs, 'y')
         if collide_with_walls(self, self.game.all_walls, 'y'):
+            # landed on a wall, so the player can jump again
             self.jumping = False
+        # line up the player's picture with its hit box
         self.rect.center = self.hit_rect.center
 
 class Wall(Sprite):
